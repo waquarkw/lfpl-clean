@@ -60,8 +60,19 @@ def build_genre_column(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # TODO: define a function to create the audience column here
-def build_audience_column():
-    pass
+def build_audience_column(df: pd.DataFrame) -> pd.DataFrame:
+    json_path = Path('data/audience.json')
+    with open(json_path, 'r') as json_file:
+        audience_data = json.load(json_file)
+        audience_conditions = [
+            (df['ItemCollection'].isin(audience_data['Adult'])),
+            (df['ItemCollection'].isin(audience_data['Teen'])),
+            (df['ItemCollection'].isin(audience_data['Children'])),
+            (df['ItemCollection'].isin(audience_data['Unknown']))
+        ]
+        audience_values = ['Adult', 'Teen', 'Children', 'Unknown']
+        df['Audience'] = np.select(audience_conditions, audience_values)
+        return df
 
 
 def main() -> None:
@@ -109,6 +120,9 @@ def main() -> None:
 
 
     # 4. TODO: Add genre and audience columns
+    logging.info('Step4: Add genre and audience columns')
+    books_df = build_genre_column(books_df)
+    books_df = build_audience_column(books_df)
     
  
     logging.info('Saving output file.')
